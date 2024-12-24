@@ -20,4 +20,7 @@ var getLecturers = function() {
     return Lecturer.find().sort({_id: 1}); 
 };
 
+// Function to insert or delete lecturers 
+module.exports = { getLecturers };
+
 
