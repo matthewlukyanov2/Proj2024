@@ -12,4 +12,12 @@ const lecturerSchema = new mongoose.Schema({
     did: String
 });
 
+const Lecturer = mongoose.model('Lecturer', lecturerSchema);
+
+// Fetch all lecturers from MongoDB
+var getLecturers = function() {
+    // Sort by lecturer ID
+    return Lecturer.find().sort({_id: 1}); 
+};
+
 
