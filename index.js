@@ -24,3 +24,14 @@ app.get("/students", (req, res) => {
         res.status(500).send(error);  
     });
 });
+
+// Route to fetch lecturers (GET /lecturers)
+app.get("/lecturers", (req, res) => {
+    mongoDAO.getLecturers()
+    .then((data) => {
+        res.json(data);  
+    })
+    .catch((error) => {
+        res.status(500).send(error); 
+    });
+});
