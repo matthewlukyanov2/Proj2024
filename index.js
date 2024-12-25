@@ -13,3 +13,14 @@ app.listen(3004, () => {
 app.get("/", (req, res) => {
     res.send("<h1>Welcome to the Home Page</h1>");
 });
+
+// Route to fetch students (GET /students)
+app.get("/students", (req, res) => {
+    mysqlDAO.getStudents()
+    .then((data) => {
+        res.json(data);  
+    })
+    .catch((error) => {
+        res.status(500).send(error);  
+    });
+});
