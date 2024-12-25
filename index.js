@@ -8,3 +8,8 @@ var app = express();
 app.listen(3004, () => {
     console.log("Running on port 3004");
 });
+
+// Home route (GET /)
+app.get("/", (req, res) => {
+    res.send("<h1>Welcome to the Home Page</h1>");
+});
