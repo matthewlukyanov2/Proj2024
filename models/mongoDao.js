@@ -1,7 +1,10 @@
 const mongoose = require('mongoose');
 
+// MongoDB Atlas connection string 
+const uri = "mongodb+srv://brucedog9:Cooldude123!@cluster0.gjkb2.mongodb.net/proj2024MongoDB?retryWrites=true&w=majority&appName=Cluster0"; // Use your database name here
+
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/proj2024MongoDB', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 .then(() => console.log('MongoDB connected'))
 .catch((error) => console.log('MongoDB connection error:', error));
 
