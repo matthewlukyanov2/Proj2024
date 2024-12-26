@@ -35,3 +35,5 @@ app.get("/lecturers", (req, res) => {
         res.status(500).send(error); 
     });
 });
+
+//test
