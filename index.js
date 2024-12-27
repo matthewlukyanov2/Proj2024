@@ -1,8 +1,12 @@
 var express = require('express');
 var mysqlDAO = require('./models/mysqlDao'); // MySQL functions
 var mongoDAO = require('./models/mongoDao'); // MongoDB functions
+var bodyParser = require('body-parser'); // Middleware for parsing JSON
 
 var app = express();
+
+// Handle JSON requests
+app.use(bodyParser.json());
 
 // Start the server
 app.listen(3004, () => {
