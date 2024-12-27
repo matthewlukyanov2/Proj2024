@@ -40,4 +40,14 @@ app.get("/lecturers", (req, res) => {
     });
 });
 
-//test
+// Route to add a new lecturer (POST /lecturers)
+app.post("/lecturers", (req, res) => {
+    const { _id, name, did } = req.body; 
+
+    // Create a new lecturer document
+    const newLecturer = new mongoDAO.Lecturer({
+        _id,
+        name,
+        did
+    });
+});
