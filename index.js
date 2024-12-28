@@ -51,3 +51,14 @@ app.post("/lecturers", (req, res) => {
         did
     });
 });
+
+// Save the lecturer to the database
+newLecturer.save()
+.then(() => {
+    res.status(201).json({ message: "Lecturer added successfully!" });
+})
+.catch((error) => {
+    console.error("Error adding lecturer:", error);
+    res.status(500).send("Error adding lecturer");
+});
+
