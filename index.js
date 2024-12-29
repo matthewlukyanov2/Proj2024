@@ -67,3 +67,8 @@ newLecturer.save()
     res.status(500).send("Error adding lecturer");
 });
 
+// Route to delete a lecturer 
+app.delete("/lecturers/:id", (req, res) => {
+    const id = req.params.id;
+});
+
