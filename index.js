@@ -44,6 +44,11 @@ app.get("/lecturers", (req, res) => {
 app.post("/lecturers", (req, res) => {
     const { _id, name, did } = req.body; 
 
+    // Validation
+    if (!_id || !name || !did) {
+        return res.status(400).json({ error: "All fields (_id, name, did) are required" });
+    }
+    
     // Create a new lecturer document
     const newLecturer = new mongoDAO.Lecturer({
         _id,
