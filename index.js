@@ -79,5 +79,10 @@ app.delete("/lecturers/:id", (req, res) => {
             console.error("Error deleting lecturer:", error);
             res.status(500).send("Error deleting lecturer");
         });
-});
+    });
 
+        app.put("/lecturers/:id", (req, res) => {
+            const id = req.params.id;
+            const updatedData = req.body;
+
+});
