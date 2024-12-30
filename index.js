@@ -81,11 +81,16 @@ app.delete("/lecturers/:id", (req, res) => {
         });
     });
 
+       // Route to update a lecturer
         app.put("/lecturers/:id", (req, res) => {
             const id = req.params.id;
             const updatedData = req.body;
 
-            mongoDAO.Lecturer.updateOne({ _id: id }, updatedData)
+            if (!updatedData || Object.keys(updatedData).length === 0) {
+                return res.status(400).json({ error: "No update data provided." });
+            }
+
+            mongoDAO.Lecturer.updateOne({ _id: id }, { $set: updatedData })
             .then(() => {
                 res.json({ message: `Lecturer with ID ${id} updated successfully.` });
             })
