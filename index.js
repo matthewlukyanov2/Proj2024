@@ -85,4 +85,13 @@ app.delete("/lecturers/:id", (req, res) => {
             const id = req.params.id;
             const updatedData = req.body;
 
+            mongoDAO.Lecturer.updateOne({ _id: id }, updatedData)
+            .then(() => {
+                res.json({ message: `Lecturer with ID ${id} updated successfully.` });
+            })
+            .catch((error) => {
+                console.error("Error updating lecturer:", error);
+                res.status(500).send("Error updating lecturer");
+            });
+
 });
