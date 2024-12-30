@@ -70,5 +70,14 @@ newLecturer.save()
 // Route to delete a lecturer 
 app.delete("/lecturers/:id", (req, res) => {
     const id = req.params.id;
+
+    mongoDAO.Lecturer.deleteOne({ _id: id })
+        .then(() => {
+            res.json({ message: `Lecturer with ID ${id} deleted successfully.` });
+        })
+        .catch((error) => {
+            console.error("Error deleting lecturer:", error);
+            res.status(500).send("Error deleting lecturer");
+        });
 });
 
