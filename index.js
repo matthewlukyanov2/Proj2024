@@ -31,6 +31,11 @@ app.get("/students", (req, res) => {
 
 // Route to fetch lecturers (GET /lecturers)
 app.get("/lecturers", (req, res) => {
+    //Sets Default limit
+    const page = parseInt(req.query.page) || 1; 
+    const limit = parseInt(req.query.limit) || 10; 
+    const skip = (page - 1) * limit;
+
     mongoDAO.getLecturers()
     .then((data) => {
         res.json(data);  
