@@ -25,7 +25,7 @@ app.get("/students", (req, res) => {
         res.json(data);  
     })
     .catch((error) => {
-        res.status(500).send(error);  
+        res.status(500).json(error);  
     });
 });
 
@@ -36,7 +36,7 @@ app.get("/lecturers", (req, res) => {
     const limit = parseInt(req.query.limit) || 10; 
     const skip = (page - 1) * limit;
 
-    mongoDAO.getLecturers()
+    mongoDAO.getLecturers({ skip, limit })
     .then((data) => {
         res.json(data);  
     })
@@ -65,15 +65,7 @@ app.post("/lecturers", (req, res) => {
         did
     });
 
-    // Save the lecturer to the database
-    newLecturer.save()
-        .then(() => {
-            res.status(201).json({ message: "Lecturer added successfully!" });
-        })
-        .catch((error) => {
-            console.error("Error adding lecturer:", error);
-            res.status(500).json({ error: "Error while adding lecturer." });
-        });
+    
 });
 
 // Save the lecturer to the database
@@ -82,32 +74,30 @@ newLecturer.save()
     res.status(201).json({ message: "Lecturer added successfully!" });
 })
 .catch((error) => {
-    console.error("Error adding lecturer:", error);
-    res.status(500).send("Error adding lecturer");
+    console.error("Error adding lecturer:", error.stack);
+    res.status(500).json("Error adding lecturer");
 });
 
 
 // Route to delete a lecturer 
-app.delete("/lecturers/:id", (req, res) => {
+app.delete("/lecturers/:id", async (req, res) => {
+    try {
     const id = req.params.id;
+    const lecturer = await mongoDAO.Lecturer.findOne({ _id: id });
 
-    mongoDAO.Lecturer.findOne({ _id: id })
-        .then((lecturer) => {
+    
             if (!lecturer) {
                 return res.status(404).json({ error: `Lecturer with ID ${id} not found.` });
             }
 
-            // If lecturer exists delete it
-            return mongoDAO.Lecturer.deleteOne({ _id: id });
-        })
-        .then(() => {
+            await mongoDAO.Lecturer.deleteOne({ _id: id });
             res.json({ message: `Lecturer with ID ${id} deleted successfully.` });
-        })
-        .catch((error) => {
-            console.error("Error deleting lecturer:", error);
+        }
+        catch(error) {
+            console.error("Error deleting lecturer:", error.stack);
             res.status(500).json({ error: "Error deleting lecturer" });
+        }
         });
-});
 
        // Route to update a lecturer
         app.put("/lecturers/:id", (req, res) => {
@@ -118,13 +108,21 @@ app.delete("/lecturers/:id", (req, res) => {
                 return res.status(400).json({ error: "No update data provided." });
             }
 
-            mongoDAO.Lecturer.updateOne({ _id: id }, { $set: updatedData })
+            mongoDAO.Lecturer.findOne({ _id: id })
+        .then((lecturer) => {
+            if (!lecturer) {
+                return res.status(404).json({ error: `Lecturer with ID ${id} not found.` });
+            }
+            
+
+           return mongoDAO.Lecturer.updateOne({ _id: id }, { $set: updatedData })
             .then(() => {
                 res.json({ message: `Lecturer with ID ${id} updated successfully.` });
             })
             .catch((error) => {
-                console.error("Error updating lecturer:", error);
-                res.status(500).send("Error updating lecturer");
+                console.error("Error updating lecturer:", error.stack);
+                res.status(500).json("Error updating lecturer");
             });
+        });
 
 });
