@@ -25,7 +25,8 @@ app.get("/students", (req, res) => {
         res.json(data);  
     })
     .catch((error) => {
-        res.status(500).json(error);  
+        console.error("Error fetching students:", error.stack);
+        res.status(500).json({ error: "Error fetching students" }); 
     });
 });
 
@@ -41,7 +42,8 @@ app.get("/lecturers", (req, res) => {
         res.json(data);  
     })
     .catch((error) => {
-        res.status(500).send(error); 
+        console.error("Error fetching lecturers:", error.stack);
+        res.status(500).json({ error: "Error fetching lecturers" });
     });
 });
 
@@ -65,9 +67,6 @@ app.post("/lecturers", (req, res) => {
         did
     });
 
-    
-});
-
 // Save the lecturer to the database
 newLecturer.save()
 .then(() => {
@@ -75,7 +74,8 @@ newLecturer.save()
 })
 .catch((error) => {
     console.error("Error adding lecturer:", error.stack);
-    res.status(500).json("Error adding lecturer");
+    res.status(500).json({ error: "Error adding lecturer" });
+ });
 });
 
 
@@ -100,7 +100,7 @@ app.delete("/lecturers/:id", async (req, res) => {
         });
 
        // Route to update a lecturer
-        app.put("/lecturers/:id", (req, res) => {
+        app.put("/lecturers/:id", async (req, res) => {
             const id = req.params.id;
             const updatedData = req.body;
 
@@ -108,21 +108,20 @@ app.delete("/lecturers/:id", async (req, res) => {
                 return res.status(400).json({ error: "No update data provided." });
             }
 
-            mongoDAO.Lecturer.findOne({ _id: id })
-        .then((lecturer) => {
+            try {
+                const lecturer = await mongoDAO.Lecturer.findOne({ _id: id });
             if (!lecturer) {
                 return res.status(404).json({ error: `Lecturer with ID ${id} not found.` });
             }
             
 
-           return mongoDAO.Lecturer.updateOne({ _id: id }, { $set: updatedData })
-            .then(() => {
+            await mongoDAO.Lecturer.updateOne({ _id: id }, { $set: updatedData });
                 res.json({ message: `Lecturer with ID ${id} updated successfully.` });
-            })
-            .catch((error) => {
+            } catch (error) {
                 console.error("Error updating lecturer:", error.stack);
-                res.status(500).json("Error updating lecturer");
-            });
-        });
+                res.status(500).json({ error: "Error updating lecturer" });
+            }
+         });
+        
 
-});
+
