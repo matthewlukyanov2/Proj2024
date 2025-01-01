@@ -53,6 +53,10 @@ app.post("/lecturers", (req, res) => {
     if (!_id || !name || !did) {
         return res.status(400).json({ error: "All fields (_id, name, did) are required" });
     }
+
+    if (_id.length !== 24) {
+        return res.status(400).json({ error: "Invalid ID format. It must be 24 characters long." });
+    }
     
     // Create a new lecturer document
     const newLecturer = new mongoDAO.Lecturer({
