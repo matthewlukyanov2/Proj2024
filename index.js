@@ -82,18 +82,63 @@ app.get("/students", (req, res) => {
 
 // Route to fetch lecturers (GET /lecturers)
 app.get("/lecturers", (req, res) => {
-    //Sets Default limit
-    const page = parseInt(req.query.page) || 1; 
-    const limit = parseInt(req.query.limit) || 10; 
-    const skip = (page - 1) * limit;
-
-    mongoDAO.getLecturers({ skip, limit })
-    .then((data) => {
-        res.json(data);  
+    mongoDAO.getLecturers()
+    .then((lecturers) => {
+        let lecturerList = lecturers.map(lecturer => `<li>${lecturer.name} (ID: ${lecturer._id})</li>`).join("");
+        res.send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Lecturers</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        background-color: #f4f4f9;
+                        color: #333;
+                        text-align: center;
+                        padding: 20px;
+                    }
+                    ul {
+                        list-style-type: none;
+                        padding: 0;
+                    }
+                    li {
+                        margin: 5px 0;
+                        padding: 10px;
+                        background-color: #e7f3e7;
+                        border: 1px solid #ccc;
+                        border-radius: 5px;
+                    }
+                    a {
+                        display: inline-block;
+                        margin-top: 20px;
+                        text-decoration: none;
+                        padding: 10px 20px;
+                        background-color: #4CAF50;
+                        color: white;
+                        border-radius: 5px;
+                    }
+                    a:hover {
+                        background-color: #45a049;
+                    }
+                </style>
+            </head>
+            <body>
+                <h1>Lecturers</h1>
+                <ul>
+                    ${lecturerList}
+                </ul>
+                <a href="/">Back to Home</a>
+            </body>
+            </html>
+        `);
+  
     })
     .catch((error) => {
         console.error("Error fetching lecturers:", error.stack);
-        res.status(500).json({ error: "Error fetching lecturers" });
+        res.status(500).send("<p>Error fetching lecturers</p>");
     });
 });
 
