@@ -22,7 +22,37 @@ var getStudents = function() {
     return new Promise((resolve, reject) => {
         pool.query('SELECT * FROM student ORDER BY sid')
         .then((data) => {
+            console.log(data);// added line
             resolve(data);
+        })
+        .catch((error) => {
+            reject(error);
+        });
+    });
+};
+
+// Function to check if a student exists by id or other criteria
+var studentExists = function(criteria) {
+    return new Promise((resolve, reject) => {
+        let query = 'SELECT * FROM student WHERE ';
+        let queryParams = [];
+        
+        // Build query dynamically based on the criteria object
+        Object.keys(criteria).forEach((key, index) => {
+            query += `${key} = ?`;
+            queryParams.push(criteria[key]);
+            if (index < Object.keys(criteria).length - 1) {
+                query += ' AND ';
+            }
+        });
+
+        pool.query(query, queryParams)
+        .then((data) => {
+            if (data.length > 0) {
+                resolve(true); // Student found
+            } else {
+                resolve(false); // Student not found
+            }
         })
         .catch((error) => {
             reject(error);
