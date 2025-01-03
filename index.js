@@ -1,74 +1,111 @@
-var express = require('express');
-var bodyParser = require('body-parser'); // Middleware for parsing JSON
-var studentRoutes = require('./routes/studentRoutes'); // Import student routes
-var lecturerRoutes = require('./routes/lecturerRoutes'); // Import lecturer routes
+const express = require('express');
+const mysql = require('mysql2');
+const bodyParser = require('body-parser');
+const path = require('path');
 
-var app = express();
+const app = express();
 
-// Handle JSON requests
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// Middleware
+app.use(bodyParser.urlencoded({ extended: false }));
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
-// Import the routes
-app.use('/students', studentRoutes); 
-app.use('/lecturers', lecturerRoutes); 
+// MySQL connection setup using your `proj2024mysql` database
+const pool = mysql.createPool({
+  host: 'localhost',
+  user: 'root',         // Your MySQL username
+  password: 'Cooldude123!', // Your MySQL password
+  database: 'proj2024mysql' // Your database name
+});
 
-// Home route (GET /)
-app.get("/", (req, res) => {
-    res.send(`
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Home Page</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    text-align: center;
-                    margin: 0;
-                    padding: 0;
-                    background-color: #f4f4f9;
-                    color: #333;
-                }
-                h1 {
-                    color: #4CAF50;
-                    margin-top: 20px;
-                }
-                nav {
-                    margin: 20px 0;
-                }
-                nav a {
-                    text-decoration: none;
-                    padding: 10px 20px;
-                    background-color: #4CAF50;
-                    color: white;
-                    border-radius: 5px;
-                    margin: 0 10px;
-                    transition: background-color 0.3s ease;
-                }
-                nav a:hover {
-                    background-color: #45a049;
-                }
-                footer {
-                    margin-top: 30px;
-                    font-size: 14px;
-                    color: #666;
-                }
-            </style>
-        </head>
-        <body>
-            <h1>Welcome to the Home Page</h1>
-            <nav>
-                <a href="/lecturers">View Lecturers</a>
-                <a href="/students">View Students</a>
-            </nav>
-        </body>
-        </html>
-    `);
+// Routes
+
+// 1. Display all students (GET /students)
+app.get('/students', (req, res) => {
+  pool.query('SELECT * FROM student ORDER BY sid ASC', (err, results) => {
+    if (err) throw err;
+    res.render('students', { students: results });
+  });
+});
+
+// 2. Show Add Student form (GET /students/add)
+app.get('/students/add', (req, res) => {
+  res.render('addStudent', { error: null });
+});
+
+// 3. Handle Add Student form submission (POST /students/add)
+app.post('/students/add', (req, res) => {
+  const { sid, name, age } = req.body;
+
+  // Validation checks
+  if (sid.length !== 4) {
+    return res.render('addStudent', { error: "Student ID must be 4 characters" });
+  }
+  if (name.length < 2) {
+    return res.render('addStudent', { error: "Name must be at least 2 characters long" });
+  }
+  if (age < 18) {
+    return res.render('addStudent', { error: "Age must be 18 or older" });
+  }
+
+  // Check if the student ID already exists
+  pool.query('SELECT * FROM student WHERE sid = ?', [sid], (err, result) => {
+    if (err) throw err;
+    if (result.length > 0) {
+      return res.render('addStudent', { error: "Student with this ID already exists" });
+    }
+
+    // Add student to the database
+    pool.query('INSERT INTO student (sid, name, age) VALUES (?, ?, ?)', 
+      [sid, name, age], (err) => {
+        if (err) throw err;
+        res.redirect('/students'); // Redirect to students page after successful add
+    });
+  });
+});
+
+// 4. Show Edit Student form (GET /students/edit/:sid)
+app.get('/students/edit/:sid', (req, res) => {
+  const sid = req.params.sid;
+  pool.query('SELECT * FROM student WHERE sid = ?', [sid], (err, result) => {
+    if (err) throw err;
+    res.render('editStudent', { student: result[0], error: null });
+  });
+});
+
+// 5. Handle Edit Student form submission (POST /students/edit/:sid)
+app.post('/students/edit/:sid', (req, res) => {
+  const sid = req.params.sid;
+  const { name, age } = req.body;
+
+  // Validation checks
+  if (name.length < 2) {
+    return res.render('editStudent', { 
+      student: { sid, name, age },
+      error: "Name must be at least 2 characters long"
+    });
+  }
+  if (age < 18) {
+    return res.render('editStudent', { 
+      student: { sid, name, age },
+      error: "Age must be 18 or older"
+    });
+  }
+
+  // Update student details in the database
+  pool.query('UPDATE student SET name = ?, age = ? WHERE sid = ?', 
+    [name, age, sid], (err) => {
+      if (err) throw err;
+      res.redirect('/students'); // Redirect to students page after successful update
+  });
+});
+
+// 6. Home route (GET /)
+app.get('/', (req, res) => {
+  res.send('<h1>Welcome to the Students Database</h1><a href="/students">Go to Students Page</a>');
 });
 
 // Start the server
-app.listen(3004, () => {
-    console.log("Running on port 3004");
+app.listen(3000, () => {
+  console.log('Server is running on http://localhost:3000');
 });
