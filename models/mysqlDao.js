@@ -22,7 +22,6 @@ var getStudents = function() {
     return new Promise((resolve, reject) => {
         pool.query('SELECT * FROM student ORDER BY sid')
         .then((data) => {
-            console.log(data);// added line
             resolve(data);
         })
         .catch((error) => {
