@@ -7,10 +7,11 @@ var app = express();
 
 // Handle JSON requests
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// Use the imported routes
-app.use('/students', studentRoutes); // All routes starting with /students will use studentRoutes.js
-app.use('/lecturers', lecturerRoutes); // All routes starting with /lecturers will use lecturerRoutes.js
+// Import the routes
+app.use('/students', studentRoutes); 
+app.use('/lecturers', lecturerRoutes); 
 
 // Home route (GET /)
 app.get("/", (req, res) => {

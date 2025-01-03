@@ -1,12 +1,20 @@
-const express = require('express');
-const mongoDAO = require('../models/mongoDao'); // MongoDB functions
-const router = express.Router();
+const mongoose = require('mongoose');
 
-// Route to fetch lecturers (GET /lecturers)
+
+var express = require('express');
+var mongoDAO = require('../models/mongoDao');
+var router = express.Router();
+
+// Route to fetch all lecturers
 router.get('/', (req, res) => {
     mongoDAO.getLecturers()
     .then((lecturers) => {
-        let lecturerList = lecturers.map(lecturer => `<li>${lecturer.name} (ID: ${lecturer._id})</li>`).join("");
+        let lecturerList = lecturers.map(lecturer => 
+            `<li>${lecturer.name} (ID: ${lecturer._id}) 
+                <a href="/lecturers/edit/${lecturer._id}">Edit</a> 
+                <a href="/lecturers/delete/${lecturer._id}">Delete</a>
+            </li>`
+        ).join("");
         res.send(`
             <!DOCTYPE html>
             <html lang="en">
@@ -35,9 +43,9 @@ router.get('/', (req, res) => {
                     }
                     a {
                         display: inline-block;
-                        margin-top: 20px;
+                        margin-top: 10px;
                         text-decoration: none;
-                        padding: 10px 20px;
+                        padding: 5px 10px;
                         background-color: #4CAF50;
                         color: white;
                         border-radius: 5px;
@@ -52,7 +60,7 @@ router.get('/', (req, res) => {
                 <ul>
                     ${lecturerList}
                 </ul>
-                <a href="/">Back to Home</a>
+                <a href="/lecturers/add">Add New Lecturer</a>
             </body>
             </html>
         `);
@@ -63,35 +71,102 @@ router.get('/', (req, res) => {
     });
 });
 
-// Route to add a new lecturer (POST /lecturers)
-router.post('/', (req, res) => {
-    const { _id, name, did } = req.body;
+// Route to show the form to add a new lecturer (GET /lecturers/add)
+router.get('/add', (req, res) => {
+    res.send(`
+        <h1>Add New Lecturer</h1>
+        <form action="/lecturers/add" method="POST">
+            <label for="name">Name:</label>
+            <input type="text" name="name" required><br><br>
+            <label for="did">Department ID:</label>
+            <input type="text" name="did" required><br><br>
+            <button type="submit">Add Lecturer</button>
+        </form>
+        <a href="/lecturers">Back to Lecturers List</a>
+    `);
+});
 
-    // Validation
-    if (!_id || !name || !did) {
-        return res.status(400).json({ error: "All fields (_id, name, did) are required" });
+// Route to handle adding a new lecturer (POST /lecturers/add)
+router.post('/add', (req, res) => {
+    const { name, did } = req.body;
+
+    if (!name || !did) {
+        return res.status(400).send("Missing required fields");
     }
 
-    if (_id.length !== 24) {
-        return res.status(400).json({ error: "Invalid ID format. It must be 24 characters long." });
-    }
+    const newLecturer = {
+        _id: new mongoose.Types.ObjectId(),  // Use a new ObjectId
+        name: name,
+        did: did
+    };
 
-    const newLecturer = new mongoDAO.Lecturer({
-        _id,
-        name,
-        did
-    });
-
-    newLecturer.save()
+    mongoDAO.addLecturer(newLecturer)
     .then(() => {
-        res.status(201).json({ message: "Lecturer added successfully!" });
+        res.redirect('/lecturers');
     })
     .catch((error) => {
         console.error("Error adding lecturer:", error.stack);
-        res.status(500).json({ error: "Error adding lecturer" });
+        res.status(500).send("<p>Error adding lecturer</p>");
     });
 });
 
-// Export the router so it can be used in the main app
+// Route to show the form to edit a lecturer (GET /lecturers/edit/:id)
+router.get('/edit/:id', (req, res) => {
+    const { id } = req.params;
+    mongoDAO.getLecturerById(id)  // Fetch the lecturer by ID
+    .then((lecturer) => {
+        if (lecturer) {
+            res.send(`
+                <h1>Edit Lecturer</h1>
+                <form action="/lecturers/edit/${lecturer._id}" method="POST">
+                    <input type="text" name="name" value="${lecturer.name}" required>
+                    <input type="text" name="did" value="${lecturer.did}" required>
+                    <button type="submit">Save Changes</button>
+                </form>
+                <a href="/lecturers">Back to Lecturers List</a>
+            `);
+        } else {
+            res.status(404).send("Lecturer not found");
+        }
+    })
+    .catch((error) => {
+        console.error("Error fetching lecturer:", error.stack);
+        res.status(500).send("<p>Error fetching lecturer</p>");
+    });
+});
+
+// Route to update a lecturer (POST /lecturers/edit/:id)
+router.post('/edit/:id', (req, res) => {
+    const { id } = req.params;
+    const { name, did } = req.body;
+
+    if (!name || !did) {
+        return res.status(400).send("Missing fields");
+    }
+
+    mongoDAO.updateLecturer(id, { name, did })
+    .then(() => {
+        res.redirect('/lecturers');
+    })
+    .catch((error) => {
+        console.error("Error updating lecturer:", error.stack);
+        res.status(500).send("<p>Error updating lecturer</p>");
+    });
+});
+
+// Route to delete a lecturer (GET /lecturers/delete/:id)
+router.get('/delete/:id', (req, res) => {
+    const { id } = req.params;
+
+    mongoDAO.deleteLecturer(id)
+    .then(() => {
+        res.redirect('/lecturers');
+    })
+    .catch((error) => {
+        console.error("Error deleting lecturer:", error.stack);
+        res.status(500).send("<p>Error deleting lecturer</p>");
+    });
+});
+
 module.exports = router;
 
