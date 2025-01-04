@@ -3,16 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Students List</title>
+    <title>Students</title>
 </head>
 <body>
     <h1>Students List</h1>
+
+    <!-- Home Button -->
+    <a href="/" style="margin-right: 10px;">
+        <button>Home</button>
+    </a>
+
+    <!-- Add Student Button -->
+    <a href="/students/add">
+        <button>Add Student</button>
+    </a>
+
     <table>
         <thead>
             <tr>
                 <th>Student ID</th>
                 <th>Name</th>
                 <th>Age</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
@@ -21,9 +33,15 @@
                     <td><%= student.sid %></td>
                     <td><%= student.name %></td>
                     <td><%= student.age %></td>
+                    <td>
+                        <!-- Update Link -->
+                        <a href="/students/edit/<%= student.sid %>">Update</a>
+                    </td>
                 </tr>
             <% }) %>
         </tbody>
     </table>
 </body>
 </html>
+
+
