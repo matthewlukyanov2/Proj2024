@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grades Page</title>
+</head>
+<body>
+    <h1>Grades</h1>
+    <a href="/">Home</a> <!-- Link to Home page -->
+    <br><br>
+    
+    <h2>Student Grades</h2>
+    <% Object.keys(studentGrades).forEach(student => { %>
+        <h3><%= student %></h3>
+        <% if (studentGrades[student].length === 0) { %>
+            <p>No modules enrolled.</p>
+        <% } else { %>
+            <ul>
+                <% studentGrades[student].forEach(entry => { %>
+                    <li><%= entry.module %> - Grade: <%= entry.grade %></li>
+                <% }) %>
+            </ul>
+        <% } %>
+        <hr>
+    <% }) %>
+
+</body>
+</html>
