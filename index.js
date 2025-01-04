@@ -102,42 +102,46 @@ app.post('/students/edit/:sid', (req, res) => {
 
 //Home route GET /
 app.get('/', (req, res) => {
-  res.send('<h1>Welcome to the Students Database</h1><a href="/students">Go to Students Page</a>');
+  res.send(`
+    <h1>Welcome to the Students Database</h1>
+    <a href="/students">Go to Students Page</a><br>
+    <a href="/grades">Go to Grades Page</a>
+  `);
 });
 
-// 7. Display Grades (GET /grades)
+//Display grades GET /
 app.get('/grades', (req, res) => {
     const sql = `
-      SELECT students.name AS student_name, 
-             modules.module_name, 
-             grade.grade
-      FROM student AS students
-      LEFT JOIN grade ON students.sid = grade.sid
-      LEFT JOIN modules ON grade.mid = modules.mid
-      ORDER BY students.name ASC, grade.grade ASC;
+        SELECT students.name AS student_name, 
+               module.name AS module_name, 
+               grade.grade
+        FROM student AS students
+        LEFT JOIN grade ON students.sid = grade.sid
+        LEFT JOIN module ON grade.mid = module.mid
+        ORDER BY students.name ASC, grade.grade ASC;
     `;
     
     pool.query(sql, (err, results) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).send("Server Error");
-      }
-  
-      // Organize the results by student name
-      const studentGrades = results.reduce((acc, row) => {
-        if (!acc[row.student_name]) {
-          acc[row.student_name] = [];
+        if (err) {
+            console.error(err);
+            return res.status(500).send("Server Error");
         }
-        if (row.module_name) {
-          acc[row.student_name].push({ module: row.module_name, grade: row.grade });
-        }
-        return acc;
-      }, {});
-  
-      // Send the organized data to the grades view
-      res.render('grades', { studentGrades });
+
+        // Organize the results by student name
+        const studentGrades = results.reduce((acc, row) => {
+            if (!acc[row.student_name]) {
+                acc[row.student_name] = [];
+            }
+            if (row.module_name) {
+                acc[row.student_name].push({ module: row.module_name, grade: row.grade });
+            }
+            return acc;
+        }, {});
+
+        // Send the organized data to the grades view
+        res.render('grades', { studentGrades });
     });
-  });
+});
 
 // Start the server
 app.listen(3000, () => {
