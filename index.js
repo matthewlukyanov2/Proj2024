@@ -20,7 +20,7 @@ const pool = mysql.createPool({
 
 // Routes
 
-// 1. Display all students (GET /students)
+//Display all students GET /students
 app.get('/students', (req, res) => {
   pool.query('SELECT * FROM student ORDER BY sid ASC', (err, results) => {
     if (err) throw err;
@@ -28,12 +28,12 @@ app.get('/students', (req, res) => {
   });
 });
 
-// 2. Show Add Student form (GET /students/add)
+//Show Add Student form GET /students/add
 app.get('/students/add', (req, res) => {
   res.render('addStudent', { error: null });
 });
 
-// 3. Handle Add Student form submission (POST /students/add)
+//Handle Add Student form submission POST /students/add
 app.post('/students/add', (req, res) => {
   const { sid, name, age } = req.body;
 
@@ -59,12 +59,12 @@ app.post('/students/add', (req, res) => {
     pool.query('INSERT INTO student (sid, name, age) VALUES (?, ?, ?)', 
       [sid, name, age], (err) => {
         if (err) throw err;
-        res.redirect('/students'); // Redirect to students page after successful add
+        res.redirect('/students'); 
     });
   });
 });
 
-// 4. Show Edit Student form (GET /students/edit/:sid)
+//Show Edit Student form GET /students/edit/:sid
 app.get('/students/edit/:sid', (req, res) => {
   const sid = req.params.sid;
   pool.query('SELECT * FROM student WHERE sid = ?', [sid], (err, result) => {
@@ -73,7 +73,7 @@ app.get('/students/edit/:sid', (req, res) => {
   });
 });
 
-// 5. Handle Edit Student form submission (POST /students/edit/:sid)
+//Handle Edit Student form submission POST /students/edit/:sid
 app.post('/students/edit/:sid', (req, res) => {
   const sid = req.params.sid;
   const { name, age } = req.body;
@@ -96,11 +96,11 @@ app.post('/students/edit/:sid', (req, res) => {
   pool.query('UPDATE student SET name = ?, age = ? WHERE sid = ?', 
     [name, age, sid], (err) => {
       if (err) throw err;
-      res.redirect('/students'); // Redirect to students page after successful update
+      res.redirect('/students'); 
   });
 });
 
-// 6. Home route (GET /)
+//Home route GET /
 app.get('/', (req, res) => {
   res.send('<h1>Welcome to the Students Database</h1><a href="/students">Go to Students Page</a>');
 });
