@@ -12,12 +12,74 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // MongoDB Atlas connection string
-const uri = "mongodb+srv://brucedog9:Cooldude123!@cluster0.gjkb2.mongodb.net/proj2024MongoDB?retryWrites=true&w=majority&appName=Cluster0"; // Use your database name here
+const uri = "mongodb+srv://brucedog9:Cooldude123!@cluster0.gjkb2.mongodb.net/proj2024MongoDB?retryWrites=true&w=majority&appName=Cluster0"; 
 
 // Connect to MongoDB
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
-.then(() => console.log('MongoDB connected'))
-.catch((error) => console.log('MongoDB connection error:', error));
+  .then(() => console.log('MongoDB connected'))
+  .catch((error) => console.log('MongoDB connection error:', error));
+
+// MongoDB schema for Module (define before use)
+const moduleSchema = new mongoose.Schema({
+  mid: { type: String, required: true },
+  name: { type: String, required: true },
+  lecturer: { type: String, required: true }
+});
+
+// Define the Module model
+const Module = mongoose.models.Module || mongoose.model('Module', moduleSchema);
+
+// MongoDB schema for Lecturer
+const lecturerSchema = new mongoose.Schema({
+  lid: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
+  did: { type: String, required: true },
+});
+
+// Define the Lecturer model
+const Lecturer = mongoose.model('Lecturer', lecturerSchema);
+
+// Routes
+
+// 1. Display all lecturers (GET /lecturers)
+app.get('/lecturers', async (req, res) => {
+    try {
+      const lecturers = await Lecturer.find().sort({ lid: 1 });
+      //console.log('Lecturers data:', lecturers);  // Log the lecturers data to check the lid values
+      res.render('lecturers', { lecturers });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Error fetching lecturers');
+    }
+  });
+
+// 2. Handle delete lecturer (GET /lecturers/delete/:lid)
+app.get('/lecturers/delete/:lid', async (req, res) => {
+    const lid = req.params.lid;  // Get lid (which will be the ObjectId here)
+    console.log(`Attempting to delete lecturer with lid (ObjectId): "${lid}"`);
+
+    try {
+        // Convert the lid to ObjectId 
+        const lecturerId = new mongoose.Types.ObjectId(lid); 
+
+        // Delete lecturer by _id 
+        const deleteResult = await Lecturer.findOneAndDelete({ _id: lecturerId });
+
+        if (!deleteResult) {
+            console.log(`No lecturer found with _id ${lecturerId}`);
+            return res.status(404).send('Lecturer not found');
+        }
+
+        console.log(`Lecturer with _id ${lecturerId} has been deleted.`);
+        res.redirect('/lecturers');  
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+  
+
+  
 
 // MySQL connection setup using your `proj2024mysql` database
 const pool = mysql.createPool({
@@ -115,6 +177,7 @@ app.get('/', (req, res) => {
     <h1>Welcome to the Students Database</h1>
     <a href="/students">Go to Students Page</a><br>
     <a href="/grades">Go to Grades Page</a>
+    <a href="/lecturers">Go to Lecturers Page</a>
   `);
 });
 

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecturers</title>
+</head>
+<body>
+  <h1>Lecturers (MongoDB)</h1>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Lecturer ID</th>
+        <th>Name</th>
+        <th>Department ID</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% lecturers.forEach(lecturer => { %>
+        <tr>
+          <td><%= lecturer.lid %></td> <!-- Lecturer ID -->
+          <td><%= lecturer.name %></td> <!-- Lecturer Name -->
+          <td><%= lecturer.did %></td> <!-- Department ID -->
+          <td>
+            <a href="/lecturers/delete/<%= lecturer._id %>">Delete</a> <!-- Delete Action -->
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <a href="/">Back to Main Page</a>
+</body>
+</html>
+
