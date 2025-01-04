@@ -19,7 +19,7 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connected'))
   .catch((error) => console.log('MongoDB connection error:', error));
 
-// MongoDB schema for Module (define before use)
+// MongoDB schema for Module 
 const moduleSchema = new mongoose.Schema({
   mid: { type: String, required: true },
   name: { type: String, required: true },
@@ -40,20 +40,26 @@ const lecturerSchema = new mongoose.Schema({
 const Lecturer = mongoose.model('Lecturer', lecturerSchema);
 
 // Routes
-
-// 1. Display all lecturers (GET /lecturers)
+//Display all lecturers 
 app.get('/lecturers', async (req, res) => {
+    const searchQuery = req.query.search || '';  // Get the search term from the query string
     try {
-      const lecturers = await Lecturer.find().sort({ lid: 1 });
-      //console.log('Lecturers data:', lecturers);  // Log the lecturers data to check the lid values
-      res.render('lecturers', { lecturers });
+      // Search by lid or name if there's a search query, otherwise get all lecturers
+      const lecturers = await Lecturer.find({
+        $or: [
+          { lid: { $regex: searchQuery, $options: 'i' } },  // Case-insensitive regex search for lid
+          { name: { $regex: searchQuery, $options: 'i' } }  // Case-insensitive regex search for name
+        ]
+      }).sort({ lid: 1 });  // Sort by lid
+  
+      res.render('lecturers', { lecturers, searchQuery });  // Pass search term back to the view for rendering
     } catch (err) {
       console.error(err);
       res.status(500).send('Error fetching lecturers');
     }
   });
 
-// 2. Handle delete lecturer (GET /lecturers/delete/:lid)
+//Handle delete lecturer from lid
 app.get('/lecturers/delete/:lid', async (req, res) => {
     const lid = req.params.lid;  // Get lid (which will be the ObjectId here)
     console.log(`Attempting to delete lecturer with lid (ObjectId): "${lid}"`);
@@ -79,9 +85,7 @@ app.get('/lecturers/delete/:lid', async (req, res) => {
 });
   
 
-  
-
-// MySQL connection setup using your `proj2024mysql` database
+// MySQL connection setup 
 const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',         // Your MySQL username
@@ -90,14 +94,24 @@ const pool = mysql.createPool({
 });
 
 // Routes
-
 //Display all students GET /students
 app.get('/students', (req, res) => {
-  pool.query('SELECT * FROM student ORDER BY sid ASC', (err, results) => {
-    if (err) throw err;
-    res.render('students', { students: results });
+    const searchQuery = req.query.search || '';  // Get the search term from the query string
+    let query = 'SELECT * FROM student WHERE 1=1';  // Default query
+    
+    // Add conditions if there's a search term
+    if (searchQuery) {
+      query += ` AND (sid LIKE '%${searchQuery}%' OR name LIKE '%${searchQuery}%' OR age LIKE '%${searchQuery}%')`;
+    }
+    
+    query += ' ORDER BY sid ASC';  // Sort by sid
+    
+    pool.query(query, (err, results) => {
+      if (err) throw err;
+      res.render('students', { students: results, searchQuery });  // Pass searchQuery to view
+    });
   });
-});
+  
 
 //Show Add Student form GET /students/add
 app.get('/students/add', (req, res) => {
@@ -135,7 +149,7 @@ app.post('/students/add', (req, res) => {
   });
 });
 
-//Show Edit Student form GET /students/edit/:sid
+//Show Edit Student form sid
 app.get('/students/edit/:sid', (req, res) => {
   const sid = req.params.sid;
   pool.query('SELECT * FROM student WHERE sid = ?', [sid], (err, result) => {
@@ -144,7 +158,7 @@ app.get('/students/edit/:sid', (req, res) => {
   });
 });
 
-//Handle Edit Student form submission POST /students/edit/:sid
+//Handle Edit Student form submission sid
 app.post('/students/edit/:sid', (req, res) => {
   const sid = req.params.sid;
   const { name, age } = req.body;
@@ -174,7 +188,7 @@ app.post('/students/edit/:sid', (req, res) => {
 //Home route GET /
 app.get('/', (req, res) => {
   res.send(`
-    <h1>Welcome to the Students Database</h1>
+    <h1>G00421514</h1>
     <a href="/students">Go to Students Page</a><br>
     <a href="/grades">Go to Grades Page</a>
     <a href="/lecturers">Go to Lecturers Page</a>
@@ -216,6 +230,6 @@ app.get('/grades', (req, res) => {
 });
 
 // Start the server
-app.listen(3000, () => {
-  console.log('Server is running on http://localhost:3000');
+app.listen(3004, () => {
+  console.log('Server is running on http://localhost:3004');
 });

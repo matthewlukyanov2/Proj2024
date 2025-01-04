@@ -9,6 +9,12 @@
   <h1>Lecturers (MongoDB)</h1>
   <table border="1">
     <thead>
+
+        <form action="/lecturers" method="GET">
+            <input type="text" name="search" placeholder="Search Lecturers..." value="<%= searchQuery %>" />
+            <button type="submit">Search</button>
+          </form>
+          
       <tr>
         <th>Lecturer ID</th>
         <th>Name</th>
@@ -19,11 +25,15 @@
     <tbody>
       <% lecturers.forEach(lecturer => { %>
         <tr>
-          <td><%= lecturer.lid %></td> <!-- Lecturer ID -->
-          <td><%= lecturer.name %></td> <!-- Lecturer Name -->
-          <td><%= lecturer.did %></td> <!-- Department ID -->
+          <!-- Lecturer ID -->
+          <td><%= lecturer.lid %></td> 
+          <!-- Lecturer Name -->
+          <td><%= lecturer.name %></td> 
+          <!-- Department ID -->
+          <td><%= lecturer.did %></td> 
           <td>
-            <a href="/lecturers/delete/<%= lecturer._id %>">Delete</a> <!-- Delete Action -->
+             <!-- Delete Action -->
+            <a href="/lecturers/delete/<%= lecturer._id %>">Delete</a>
           </td>
         </tr>
       <% }) %>
