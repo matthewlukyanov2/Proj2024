@@ -1,29 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grades Page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grades Page</title>
+  
 </head>
 <body>
-    <h1>Grades</h1>
-    <a href="/">Home</a> <!-- Link to Home page -->
-    <br><br>
-    
-    <h2>Student Grades</h2>
-    <% Object.keys(studentGrades).forEach(student => { %>
-        <h3><%= student %></h3>
-        <% if (studentGrades[student].length === 0) { %>
-            <p>No modules enrolled.</p>
+
+  <h1>Grades Page</h1>
+
+  <!-- Link to Home -->
+  <a href="/">Home</a>
+  <br><br>
+
+  <!-- Grades Table -->
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Student Name</th>
+        <th>Module Name</th>
+        <th>Grade</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for (const studentName in studentGrades) { %>
+        <% const grades = studentGrades[studentName]; %>
+        <% if (grades.length === 0) { %>
+          <tr>
+            <td><%= studentName %></td>
+            <td>No Modules</td>
+            <td></td>
+          </tr>
         <% } else { %>
-            <ul>
-                <% studentGrades[student].forEach(entry => { %>
-                    <li><%= entry.module %> - Grade: <%= entry.grade %></li>
-                <% }) %>
-            </ul>
+          <% grades.forEach(gradeData => { %>
+            <tr>
+              <td><%= studentName %></td>
+              <td><%= gradeData.module %></td>
+              <td><%= gradeData.grade %></td>
+            </tr>
+          <% }); %>
         <% } %>
-        <hr>
-    <% }) %>
+      <% } %>
+    </tbody>
+  </table>
 
 </body>
 </html>
