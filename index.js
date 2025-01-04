@@ -1,6 +1,7 @@
 const express = require('express');
 const mysql = require('mysql2');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 const path = require('path');
 
 const app = express();
@@ -9,6 +10,14 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+// MongoDB Atlas connection string
+const uri = "mongodb+srv://brucedog9:Cooldude123!@cluster0.gjkb2.mongodb.net/proj2024MongoDB?retryWrites=true&w=majority&appName=Cluster0"; // Use your database name here
+
+// Connect to MongoDB
+mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+.then(() => console.log('MongoDB connected'))
+.catch((error) => console.log('MongoDB connection error:', error));
 
 // MySQL connection setup using your `proj2024mysql` database
 const pool = mysql.createPool({
